@@ -1,14 +1,16 @@
 # Cahier des charges 
-## Objectifs
+## Saphie Project :
+
+### Objectifs
 **1er Objectif :** Cryptage stéganographique de trois type : Image, Vidéo, Audio (Spectre) 
 
 **2ème Objectif :** Echange de clé de chifferement
 
 **3ème Objectif :** Support Web
- ## Quel languages ?
+### Quel languages ?
 * Script : Python
 * Web : HTML, CSS, Java Script
-## A faire :
+### A faire :
 ***Fonction :***
 * Stéganographie [Image](./Fonctions/steg_image.py)
 * Stéganographie [Spectre](./Fonctions/steg_spectre.py)

@@ -1,2 +1,2 @@
-# saphie-project
+# Saphie Project
 ### Best Steganographic tool
