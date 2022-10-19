@@ -1,6 +1,6 @@
 # Cahier des charges 
 ## Objectifs
-**1er Objectif :** Cryptage stéganographique de trois type : Image, Texte, Audio (Spectre) 
+**1er Objectif :** Cryptage stéganographique de trois type : Image, Vidéo, Audio (Spectre) 
 
 **2ème Objectif :** Echange de clé de chifferement
 
