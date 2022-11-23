@@ -5,7 +5,7 @@ def audio_message(file, message):
     song = wave.open(file, mode='rb')
     frame_bytes = bytearray(list(song.readframes(song.getnframes())))
     string = message
-    string = string + int((len(frame_bytes)-(len(string)*8*8))/8) *'#' #Détecte et supprime les bytes qui ne sont pas utiles (genre pour la déco)
+    string = string + int((len(frame_bytes)-(len(string)*8*8))/8) *'#' #Détecte et supprime les bytes qui ne sont pas utiles au fichier WAV
     bits = list(map(int, ''.join([bin(ord(i)).lstrip('0b').rjust(8,'0') for i in string]))) # Converstion du texte en bit array
 
     for i, bit in enumerate(bits): #Remplace chaque byte inutilisé par le texte convertis en bit
