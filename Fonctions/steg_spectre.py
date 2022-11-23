@@ -17,4 +17,15 @@ def audio_message(file, message):
         fd.writeframes(frame_modified)
     song.close()
 
-print(audio_message(r'C:\Users\alanw\saphie-project\Fonctions\Outro INSTRU.wav'), "OUAIIS")
+print(audio_message(r'C:\Users\alanw\saphie-project\Fonctions\Audio\Outro INSTRU.wav', "OUAIS"))
+
+def decode_message(file):
+    song = wave.open(file, mode='rb')
+    frame_bytes = bytearray(list(song.readframes(song.getnframes())))
+    extracted = [frame_bytes[i] & 1 for i in range(len(frame_bytes))]
+    string = "".join(chr(int("".join(map(str,extracted[i:i+8])),2)) for i in range(0,len(extracted),8))
+    decoded = string.split("###")[0]
+    print("Sucessfully decoded: "+decoded)
+    song.close()
+
+print(decode_message(r'C:\Users\alanw\saphie-project\Nouvo son.wav'))
