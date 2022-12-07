@@ -17,7 +17,7 @@ def audio_message(file, message):
         fd.writeframes(frame_modified)
     song.close()
 
-print(audio_message(r'C:\Users\alanw\saphie-project\Fonctions\Audio\Outro INSTRU.wav', "MAX MANGE DES PATES"))
+print(audio_message(r'C:\Users\alanw\saphie-project\Fonctions\Audio\Outro INSTRU.wav', "M@X M@NGE DES P@TES"))
 
 def decode_message(file):
     song = wave.open(file, mode='rb')
