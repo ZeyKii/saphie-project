@@ -19,7 +19,6 @@ if( $#ARGV < 0 )
 # Start writing the wave with the proper arguments
 write_out(( $#ARGV < 1) ? "$ARGV[0].wav" : $ARGV[1], $ARGV[0]);
 
-
 sub write_out 
 {
    # Set up the wave file
