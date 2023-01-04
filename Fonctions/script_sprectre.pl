@@ -101,3 +101,4 @@ sub add_sine {
        $write->write($samp);
    }
 }
+exec("python -u steg_comb.py")
