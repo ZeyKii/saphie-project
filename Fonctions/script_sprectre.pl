@@ -1,4 +1,3 @@
-#!/usr/bin/perl
 use strict;
 use Audio::Wav;
 use Math::Complex;
