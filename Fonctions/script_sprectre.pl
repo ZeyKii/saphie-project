@@ -79,7 +79,6 @@ sub write_out
    # Finish up
    print "\b\b\b\b\b\b\b\b\b\b\b\b\b100%   \n";
    $write->finish();
-
 }
 
 
@@ -101,4 +100,4 @@ sub add_sine {
        $write->write($samp);
    }
 }
-exec("python -u steg_comb.py")
+system("python -u steg_comb.py")
