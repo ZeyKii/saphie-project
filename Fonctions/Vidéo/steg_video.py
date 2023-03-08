@@ -1,90 +1,98 @@
-from stegano import lsb
-from os.path import isfile,join
-
-import time                                                                 #install time ,opencv,numpy modules
 import cv2
+import argparse
 import numpy as np
-import math
-import os
-import shutil
-from subprocess import call,STDOUT
 
-def split_string(s_str,count=10):
-    per_c=math.ceil(len(s_str)/count)
-    c_cout=0
-    out_str=''
-    split_list=[]
-    for s in s_str:
-        out_str+=s
-        c_cout+=1
-        if c_cout == per_c:
-            split_list.append(out_str)
-            out_str=''
-            c_cout=0
-    if c_cout!=0:
-        split_list.append(out_str)
-    return split_list
+def hide_message_in_video(video_path, message):
+    # Ouvrir la vidéo en mode écriture
+    video_capture = cv2.VideoCapture(video_path)
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fps = int(video_capture.get(cv2.CAP_PROP_FPS))
+    width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    video_writer = cv2.VideoWriter('output.mp4', fourcc, fps, (width, height))
 
-def frame_extraction(video):
-    if not os.path.exists("./tmp"):
-        os.makedirs("tmp")
-    temp_folder="./tmp"
-    print("[INFO] tmp directory is created")
+    # Convertir le message en binaire
+    binary_message = ''.join(format(ord(i), '08b') for i in message)
 
-    vidcap = cv2.VideoCapture(video)
-    count = 0
+    # Cacher le message dans chaque trame de la vidéo
+    frame_num = 0
+    while video_capture.isOpened():
+        ret, frame = video_capture.read()
+        if ret:
+            # Créer une copie de la trame originale
+            modified_frame = frame.copy()
 
-    while True:
-        success, image = vidcap.read()
-        if not success:
-            break
-        cv2.imwrite(os.path.join(temp_folder, "{:d}.png".format(count)), image)
-        count += 1
+            # Cacher les bits du message dans les canaux de couleur de chaque pixel de la trame originale
+            for i, bit in enumerate(binary_message):
+                row = i // width
+                col = i % width
+                for c in range(3):
+                    pixel_value = modified_frame[row, col, c]
+                    new_pixel_value = int(bin(pixel_value)[2:-1] + bit, 2)
+                    modified_frame[row, col, c] = new_pixel_value
 
-def encode_string(input_string,root="./tmp/"):
-    split_string_list=split_string(input_string)
-    for i in range(0,len(split_string_list)):
-        f_name="{}{}.png".format(root,i)
-        secret_enc=lsb.hide(f_name,split_string_list[i])
-        secret_enc.save(f_name)
-        print("[INFO] frame {} holds {}".format(f_name,split_string_list[i]))
-def decode_string(video):
-    frame_extraction(video)
-    secret=[]
-    root="./tmp/"
-    for i in range(len(os.listdir(root))):
-        f_name="{}{}.png".format(root,i)
-        secret_dec=lsb.reveal(f_name)
-        if secret_dec == None:
-            break
-        secret.append(secret_dec)
-        
-    print(''.join([i for i in secret]))
-    clean_tmp()
-def clean_tmp(path="./tmp"):
-    if os.path.exists(path):
-        shutil.rmtree(path)
-        print("[INFO] tmp files are cleaned up")
-
-def main():
-    input_string = input("Enter the input string :")
-    f_name=input("enter the name of video")
-    frame_extraction(f_name)
-    call(["ffmpeg", "-i",f_name, "-q:a", "0", "-map", "a", "tmp/audio.mp3", "-y"],stdout=open(os.devnull, "w"), stderr=STDOUT)
-    
-    encode_string(input_string)
-    call(["ffmpeg", "-i", "tmp/%d.png" , "-vcodec", "png", "tmp/video.mov", "-y"],stdout=open(os.devnull, "w"), stderr=STDOUT)
-    
-    call(["ffmpeg", "-i", "tmp/video.mov", "-i", "tmp/audio.mp3", "-codec", "copy", "video.mov", "-y"],stdout=open(os.devnull, "w"), stderr=STDOUT)
-    clean_tmp()
-if __name__ == "__main__":
-    while True:
-        print("1.Hide a message in video 2.Reveal the secret from video")
-        print("any other value to exit")
-        choice = input()
-        if choice == '1':
-            main()
-        elif choice == '2':
-            decode_string(input("enter the name of video with extension"))
+            # Ajouter la trame modifiée à la vidéo de sortie
+            video_writer.write(modified_frame)
+            frame_num += 1
         else:
             break
+
+    # Fermer les captures vidéo
+    video_capture.release()
+    video_writer.release()
+
+def decode_hidden_message(video_path):
+    # Ouvrir la vidéo en mode lecture
+    video_capture = cv2.VideoCapture(video_path)
+
+    # Extraire les informations sur la vidéo
+    fps = int(video_capture.get(cv2.CAP_PROP_FPS))
+    width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Initialiser le message binaire caché
+    binary_message = ''
+
+    # Lire chaque trame de la vidéo et extraire les bits cachés dans les canaux de couleur
+    frame_num = 0
+    while video_capture.isOpened():
+        ret, frame = video_capture.read()
+        if ret:
+            # Parcourir chaque pixel de la trame et extraire les bits cachés
+            for row in range(height):
+                for col in range(width):
+                    # Parcourir les canaux de couleur
+                    for c in range(3):
+                        pixel_value = frame[row, col, c]
+                        hidden_bits = bin(pixel_value)[-1]
+                        binary_message += hidden_bits
+
+            frame_num += 1
+        else:
+            break
+
+    # Fermer la capture vidéo
+    video_capture.release()
+
+    # Convertir le message binaire en texte
+    message = ''
+    for i in range(0, len(binary_message), 8):
+        byte = binary_message[i:i+8]
+        message += chr(int(byte, 2))
+
+    return message
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Hide or extract a message from a video')
+    parser.add_argument('--hide', action='store_true', help='hide a message in the video')
+    parser.add_argument('--extract', action='store_true', help='extract a hidden message from the video')
+    parser.add_argument('--video', type=str, help='path to the input video')
+    parser.add_argument('--message', type=str, help='the message to be hidden')
+    args = parser.parse_args()
+    if args.hide:
+         hide_message_in_video(args.video, args.message)
+    elif args.extract:
+        message = decode_hidden_message(args.video)
+        print(message)
+    else:
+        print("Please specify either --hide or --extract.")
