@@ -8,7 +8,7 @@ import (
 func StartServer() {
 	fs := http.FileServer(http.Dir("./static/dist/"))
 	http.Handle("/static/dist/", http.StripPrefix("/static/dist/", fs))
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":8080", nil)
 
 	http.HandleFunc("/", Main_Page)
 }
