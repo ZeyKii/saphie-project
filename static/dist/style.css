@@ -1,0 +1,21 @@
+body {
+    background-color: rgb(40, 40, 40);
+    color:lightcyan;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.title{
+    display: flex;
+    color:rgb(224, 255, 219);
+}
+
+.upload-container{
+    background-color: rgb(36, 5, 65);
+    display: inline-flex;
+    justify-content: center;
+    width: 70%;
+    margin-top: 10%;
+    align-items: center;
+}
