@@ -3,9 +3,23 @@
 # PIL module is used to extract
 # pixels of image and modify it
 from PIL import Image
+import os
 
 # Convert encoding data into 8-bit binary
 # form using ASCII value of characters
+def convert_to_bmp(input_file, output_file):
+    try:
+        with Image.open(input_file) as im:
+            # Vérification que le format de l'image est BMP
+            if im.format != 'BMP':
+                im = im.convert('RGB')
+                im.save(output_file, 'BMP')
+                print(f'Image {input_file} convertie en BMP et enregistrée sous le nom {output_file}.')
+            else:
+                print(f"L'image {input_file} est déjà au format BMP.")
+    except FileNotFoundError:
+        print(f'Fichier {input_file} non trouvé.')
+    
 def genData(data):
 
 		# list of binary codes
@@ -80,18 +94,20 @@ def encode_enc(newimg, data):
 
 # Encode data into image
 def encode():
-	img = input("Enter image name(with extension) : ")
-	image = Image.open(img, 'r')
-	data = input("Enter data to be encoded : ")
-	if (len(data) == 0):
-		raise ValueError('Data is empty')
-	newimg = image.copy()
-	encode_enc(newimg, data)
+    img = input("Enter image name(with extension) : ")
+    convert_to_bmp(img, "temp.bmp") # Conversion en BMP si nécessaire
+    image = Image.open("temp.bmp", 'r')
+    data = input("Enter data to be encoded : ")
+    if (len(data) == 0):
+        raise ValueError('Data is empty')
+    newimg = image.copy()
+    encode_enc(newimg, data)
+    new_img_name = input("Enter the name of new image(with extension) : ")
+    newimg.save(new_img_name, str(new_img_name.split(".")[1].upper()))
+    print(f"Image {new_img_name} créée avec succès !")
+    os.remove("temp.bmp")
 
-	new_img_name = input("Enter the name of new image(with extension) : ")
-	newimg.save(new_img_name + ".png", "PNG")
-
-# Decode the data in the image
+# Decode the data in the image 
 def decode():
 	img = input("Enter image name(with extension) : ")
 	image = Image.open(img, 'r')
