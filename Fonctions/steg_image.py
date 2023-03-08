@@ -1,58 +1,43 @@
+import numpy as np
 from PIL import Image
+import codecs
 
-def stegano(name_img , msg):
-    im = Image.open(name_img)
-    # on récupère les dimensions de l'image
-    w , h = im.size
-    # on sépare l'image en trois : rouge, vert et bleu
-    r , g , b = im.split()
-    # on transforme la partie rouge en liste
-    r = list( r.getdata() )
-    # on calcule la longueur de la chaîne et on la transforme en binaire
-    u = len(msg)
-    v = bin( len(msg) )[2:].rjust(8,"0")
-    # on transforme la chaîne en une liste de 0 et de 1 
-    ascii = [ bin(ord(x))[2:].rjust(8,"0") for x in msg ]
-    # transformation de la liste en chaîne
-    a = ''.join(ascii)
-    # on code la longueur de la liste dans les 8 premiers pixels rouges
-    for j in range(8):
-        r[j] = 2 * int( r[j] // 2 ) + int( v[j] )
-    # on code la chaîne dans les pixels suivants
-    for i in range(8*u):
-        r[i+8] = 2 * int( r[i+8] // 2 ) + int( a[i] )
-        
-    # on recrée l'image rouge 
-    nr = Image.new("L",(16*w,16*h))
-    nr = Image.new("L",(w,h))
-    nr.putdata(r)
-    # fusion des trois nouvelles images
-    imgnew = Image.merge('RGB',(nr,g,b))
-    new_name_img = "couv_" + name_img
-    imgnew.save(new_name_img)
+def hide_text_in_image(image_path, text_to_hide, encoding):
+    # Open the image
+    image = Image.open(image_path)
+    # Convert the image to a numpy array
+    image = np.array(image)
+    # Encode the text to hide into bytes using the specified encoding
+    encoded_text = text_to_hide.encode(encoding)
+    # Convert the encoded text to a binary string
+    binary_text = ''.join(format(b, 'b') for b in encoded_text)
+    # Add the text length to the beginning of the binary string
+    binary_text = format(len(encoded_text), 'b').zfill(16) + binary_text
+    # Iterate through the binary string, and hide each bit in the least significant bit of the image's pixels
+    for i, bit in enumerate(binary_text):
+        x, y = i // image.shape[1], i % image.shape[1]
+        image[x, y] = (image[x, y] & ~1) | int(bit)
+    # Save the modified image
+    Image.fromarray(image).save("hidden.png")
 
-print(stegano("nightcity.jpeg" , "un monde futuriste"))
+def retrieve_text_from_image(image_path, encoding):
+    # Open the image
+    image = Image.open(image_path)
+    # Convert the image to a numpy array
+    image = np.array(image)
+    # Get the length of the encoded text to be retrieved from the first 16 bits
+    text_length = int(''.join([str(image[i // image.shape[1], i % image.shape[1]][0] & 1) for i in range(16)]), 2)
+    # Retrieve the encoded text by getting the least significant bit of every pixel
+    binary_text = ''.join([str(image[i // image.shape[1], i % image.shape[1]][0] & 1) for i in range(16, 16 + text_length * 8)])
+    # Convert the binary string to bytes
+    encoded_text = bytes(int(binary_text[i:i+8], 2) for i in range(0, len(binary_text), 8))
+    # Decode the encoded text using the specified encoding
+    text = encoded_text.decode(encoding)
+    return text
 
-def get_msg(name_couv):
-    im = Image.open(name_couv)
-    r , g , b = im.split()
-    r = list( r.getdata() )
-    
-    # lecture de la longueur de la chaine
-    p = [ str(x%2) for x in r[0:8] ]
-    q = "".join(p)
-    q = int(q,2)
-    
-    # lecture du message
-    n = [ str(x%2) for x in r[8:8*(q+1)] ]
-
-    b = "".join(n)
-    message = ""
-
-    for k in range(0,q):
-        l = b[8*k:8*k+8]
-        message += chr(int(l,2))
-        
-    return message
-print(get_msg("couv_nightcity.jpeg"))
-
+# Example usage:
+text_to_hide = "coucou"
+encoding = "latin1"
+hide_text_in_image(r"C:\Users\maxfe\saphie-project\Fonctions\Image\nightcity.jpeg", text_to_hide, encoding)
+retrieved_text = retrieve_text_from_image(r"C:\Users\maxfe\saphie-project\Fonctions\hidden.png", encoding)
+print(retrieved_text)
