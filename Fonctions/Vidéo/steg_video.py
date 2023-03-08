@@ -41,58 +41,50 @@ def hide_message_in_video(video_path, message):
     video_capture.release()
     video_writer.release()
 
-def decode_hidden_message(video_path):
+def extract_message_from_video(video_path):
     # Ouvrir la vidéo en mode lecture
     video_capture = cv2.VideoCapture(video_path)
 
-    # Extraire les informations sur la vidéo
-    fps = int(video_capture.get(cv2.CAP_PROP_FPS))
-    width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    # Initialiser le message binaire caché
-    binary_message = ''
-
-    # Lire chaque trame de la vidéo et extraire les bits cachés dans les canaux de couleur
+    # Extraire le message caché dans chaque trame de la vidéo
+    binary_message = ""
     frame_num = 0
     while video_capture.isOpened():
         ret, frame = video_capture.read()
         if ret:
-            # Parcourir chaque pixel de la trame et extraire les bits cachés
-            for row in range(height):
-                for col in range(width):
-                    # Parcourir les canaux de couleur
+            # Extraire les bits du message des canaux de couleur de chaque pixel de la trame
+            for i in range(frame.shape[0]):
+                for j in range(frame.shape[1]):
                     for c in range(3):
-                        pixel_value = frame[row, col, c]
-                        hidden_bits = bin(pixel_value)[-1]
-                        binary_message += hidden_bits
+                        pixel_value = frame[i, j, c]
+                        binary_message += bin(pixel_value)[-1]
 
             frame_num += 1
         else:
             break
 
+    # Convertir les bits extraits en octets pour récupérer le message original
+    message = ""
+    for i in range(0, len(binary_message), 8):
+        message += chr(int(binary_message[i:i+8], 2))
+
     # Fermer la capture vidéo
     video_capture.release()
 
-    # Convertir le message binaire en texte
-    message = ''
-    for i in range(0, len(binary_message), 8):
-        byte = binary_message[i:i+8]
-        message += chr(int(byte, 2))
-
     return message
 
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Hide or extract a message from a video')
-    parser.add_argument('--hide', action='store_true', help='hide a message in the video')
-    parser.add_argument('--extract', action='store_true', help='extract a hidden message from the video')
-    parser.add_argument('--video', type=str, help='path to the input video')
-    parser.add_argument('--message', type=str, help='the message to be hidden')
+    parser = argparse.ArgumentParser(description='Hide and extract message in video')
+    parser.add_argument('--hide', action='store_true', help='Hide message in video')
+    parser.add_argument('--extract', action='store_true', help='Extract message from video')
+    parser.add_argument('--video_path', type=str, help='Path to video file')
+    parser.add_argument('--message', type=str, help='Message to hide in video')
     args = parser.parse_args()
+
     if args.hide:
-         hide_message_in_video(args.video, args.message)
+        hide_message_in_video(args.video_path, args.message)
     elif args.extract:
-        message = decode_hidden_message(args.video)
+        message = extract_message_from_video(args.video_path)
         print(message)
     else:
-        print("Please specify either --hide or --extract.")
+        parser.print_help()
