@@ -20,7 +20,11 @@
             <form action="/upload" method="post" enctype="multipart/form-data">
                 <input class="browse" type="file" name="image">
         </div>
-        <input type="submit" value="Upload">
+        <div>
+            <label for="file-upload">Sélectionner une image :</label>
+            <input type="file" id="file-upload" name="file-upload">
+          </div>
+          <input class="button-60" type="submit" value="Upload">
         </form>
     </div>
 </body>
