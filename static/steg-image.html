@@ -19,10 +19,29 @@
         <div class="upload">
             <form action="/upload" method="post" enctype="multipart/form-data">
                 <input class="browse" type="file" name="image">
+                <img id="imagePreview" alt="Aperçu de l'image sélectionnée">
+                
+            </form>
+            
         </div>
         <input type="submit" value="Upload">
-        </form>
     </div>
+    
+    <script>
+        const input = document.querySelector('input[name="image"]');
+        const image = document.getElementById("imagePreview");
+
+        input.addEventListener("change", function(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+
+          reader.onload = function(e) {
+            image.src = e.target.result;
+          };
+
+          reader.readAsDataURL(file);
+        });
+    </script>
 </body>
 
 </html>
