@@ -8,12 +8,18 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", Index)
+	http.HandleFunc("/steg-image", Steg_Image)
+	http.HandleFunc("/steg-audio", Steg_Audio)
 	fmt.Println("Server web lauch on http://localhost:8080/")
 	saphie.StartServer()
 }
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("./static/index.html"))
+func Steg_Image(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("./static/steg-image.html"))
+	tmpl.Execute(w, nil)
+}
+
+func Steg_Audio(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("./static/steg-audio.html"))
 	tmpl.Execute(w, nil)
 }
