@@ -16,6 +16,6 @@ func StartServer() {
 }
 
 func Main_Page(w http.ResponseWriter, r *http.Request) {
-	tpl := template.Must(template.ParseFiles("/static/dist/index.html"))
+	tpl := template.Must(template.ParseFiles("/static/index.html"))
 	tpl.Execute(w, nil)
 }
