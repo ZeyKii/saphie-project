@@ -8,11 +8,15 @@
 </head>
 
 <body>
-    <div class="title"><h1>Saphie Project</h1></div>
+    <div class="title">
+        <h1>Saphie Project</h1>
+    </div>
     <div class="upload-container">
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="image">
-            <input type="submit" value="Upload">
+        <div class="upload">
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <input class="browse" type="file" name="image">
+        </div>
+        <input type="submit" value="Upload">
         </form>
     </div>
 </body>
