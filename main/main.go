@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/steg-image", Steg_Image)
+	http.HandleFunc("/", Steg_Image)
 	http.HandleFunc("/steg-audio", Steg_Audio)
-	fmt.Println("Server web lauch on http://localhost:8080/")
+	fmt.Println("Server web lauch on http://localhost:8080")
 	saphie.StartServer()
 }
 
